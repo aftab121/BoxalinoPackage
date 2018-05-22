@@ -1,8 +1,8 @@
 module BoxalinoPackage
     require 'json'
     class BxChooseResponse
-    	
-    	def initialize(response, bxRequests=Array.new) 
+        
+        def initialize(response, bxRequests=Array.new) 
             @response = response
             @bxRequests = bxRequests.kind_of?(Array) ? bxRequests : Array.new(bxRequests)
         end
@@ -27,14 +27,14 @@ module BoxalinoPackage
 
         def addNotification(nname, parameters) 
             if(@notificationMode) 
-                @notifications.push(Array.new('name'=>nname, 'parameters'=>parameters))
+                @notifications.push(Hash.new({'name'=>nname, 'parameters'=>parameters}))
             end
         end
 
         def getNotifications
             finalNotifications = @notifications
             @bxRequests.each do |bxRequest|
-                finalNotifications.push(Array.new('name'=>'bxFacet', 'parameters'=>$bxRequest->getChoiceId()))
+                finalNotifications.push(Hash.new({'name' => 'bxFacet', 'parameters' => bxRequest.getChoiceId()}))
                 bxRequest.getFacets().getNotifications().each do |notification|
                     finalNotifications.push(notification)
                 end
@@ -51,7 +51,7 @@ module BoxalinoPackage
             @bxRequests.each do |k , bxRequest|
                 if (choice == nil || choice == bxRequest.getChoiceId()) 
                     if (count > 0)
-                        count--
+                        count -= 1
                         next
                     end
                     return getChoiceIdResponseVariant(k)
@@ -90,29 +90,29 @@ module BoxalinoPackage
             end
             return nil
         end
-    	def levenshtein_distance(s, t)
-    		m = s.length
-    		n = t.length
-    		return m if n == 0
-    		return n if m == 0
-    		d = Array.new(m+1) {Array.new(n+1)}
+        def levenshtein_distance(s, t)
+            m = s.length
+            n = t.length
+            return m if n == 0
+            return n if m == 0
+            d = Array.new(m+1) {Array.new(n+1)}
 
-    		(0..m).each {|i| d[i][0] = i}
-    		(0..n).each {|j| d[0][j] = j}
-    		(1..n).each do |j|
-    			(1..m).each do |i|
-    				d[i][j] = if s[i-1] == t[j-1]  # adjust index into string
-    				          d[i-1][j-1]       # no operation required
-    				        else
-    				          [ d[i-1][j]+1,    # deletion
-    				            d[i][j-1]+1,    # insertion
-    				            d[i-1][j-1]+1,  # substitution
-    				          ].min
-    				        end
-    			end
-    		end
-    		d[m][n]
-    	end
+            (0..m).each {|i| d[i][0] = i}
+            (0..n).each {|j| d[0][j] = j}
+            (1..n).each do |j|
+                (1..m).each do |i|
+                    d[i][j] = if s[i-1] == t[j-1]  # adjust index into string
+                              d[i-1][j-1]       # no operation required
+                            else
+                              [ d[i-1][j]+1,    # deletion
+                                d[i][j-1]+1,    # insertion
+                                d[i-1][j-1]+1,  # substitution
+                              ].min
+                            end
+                end
+            end
+            d[m][n]
+        end
 
         def getVariantSearchResult(variant, considerRelaxation=true, maxDistance=10, discardIfSubPhrases = true) 
 
@@ -122,27 +122,27 @@ module BoxalinoPackage
             end
             return correctedResult == nil ? correctedResult : searchResult
         end
-    	
-    	def getSearchResultHitVariable(searchResult, hitId, field) 
-    		if(searchResult) 
-    			if(searchResult.hits) 
-    				searchResult.hits.each do |item|
-    					if(item.values['id'] == hitId) 
-    						return item.field
-    					end
-    				end
-    			elsif(isset($searchResult->hitsGroups)) {
-    				foreach($searchResult->hitsGroups as $hitGroup) {
-    					if($hitGroup->groupValue == $hitId) {
-    						return $hitGroup->hits[0]->$field;
-    					}
-    				}
-    			end
-    		end
-    		return nil
-    	end
-    	
-    	def getSearchResultHitFieldValue(searchResult, hitId, fieldName='')
+        
+        def getSearchResultHitVariable(searchResult, hitId, field) 
+            if(searchResult) 
+                if(searchResult.hits) 
+                    searchResult.hits.each do |item|
+                        if(item.values['id'] == hitId) 
+                            return item.field
+                        end
+                    end
+                elsif(searchResult.hitsGroups != nil) 
+                    searchResult.hitsGroups do |hitGroup|
+                        if(hitGroup.groupValue == hitId) 
+                            return hitGroup.hits[0].field
+                        end
+                    end
+                end
+            end
+            return nil
+        end
+        
+        def getSearchResultHitFieldValue(searchResult, hitId, fieldName='')
 
             if (searchResult && fieldName != '') 
                 if(searchResult.hits) 
@@ -161,7 +161,7 @@ module BoxalinoPackage
             end
             return nil
         end
-    	
+        
         def getSearchResultHitIds(searchResult, fieldId='id') 
             ids = Array.new
             if(searchResult) 
@@ -181,18 +181,18 @@ module BoxalinoPackage
             return ids
         end
 
-    	def getHitExtraInfo(choice=nil,hitId = 0, info_key='', default_value = '', count=0, considerRelaxation=true, maxDistance=10, discardIfSubPhrases = true) 
+        def getHitExtraInfo(choice=nil,hitId = 0, info_key='', default_value = '', count=0, considerRelaxation=true, maxDistance=10, discardIfSubPhrases = true) 
             variant = getChoiceResponseVariant(choice, count)
             extraInfo = getSearchResultHitVariable(getVariantSearchResult(variant, considerRelaxation, maxDistance, discardIfSubPhrases), hitId, 'extraInfo')
             return extraInfo.key[info_key] ? extraInfo[info_key] : (default_value != '' ? default_value :  nil)
         end
-    	
-    	def getHitVariable(choice=nil, hitId = 0, field='',  count=0, considerRelaxation=true, maxDistance=10, discardIfSubPhrases = true)
+        
+        def getHitVariable(choice=nil, hitId = 0, field='',  count=0, considerRelaxation=true, maxDistance=10, discardIfSubPhrases = true)
             variant = getChoiceResponseVariant(choice, count)
             return getSearchResultHitVariable(getVariantSearchResult(variant, considerRelaxation, maxDistance, discardIfSubPhrases), hitId, field)
         end
-    	
-    	def getHitFieldValue(choice=null, hitId = 0,  fieldName='',  count=0, considerRelaxation=true, maxDistance=10, discardIfSubPhrases = true)
+        
+        def getHitFieldValue(choice=null, hitId = 0,  fieldName='',  count=0, considerRelaxation=true, maxDistance=10, discardIfSubPhrases = true)
             variant = getChoiceResponseVariant(choice, count)
             return getSearchResultHitFieldValue(getVariantSearchResult(variant, considerRelaxation, maxDistance, discardIfSubPhrases), hitId, fieldName)
         end
@@ -282,7 +282,8 @@ module BoxalinoPackage
             end
             count = 0
             getHitFieldValues(fieldNames, choice, true, count, maxDistance).each do |id , fieldValueMap|
-                if(count++ < hitIndex) 
+                count += 1
+                if ( count < hitIndex) 
                     next
                 end
                 fieldValueMap.each do |fieldName , fieldValues|
@@ -372,9 +373,9 @@ module BoxalinoPackage
         end
 
         def getSubPhraseHitIds(queryText, choice=nil, count=0, fieldId='id') 
-            searchResult = $this->getSubPhraseSearchResult($queryText, $choice, $count);
-            if($searchResult) {
-                return $this->getSearchResultHitIds($searchResult, $fieldId);
+            searchResult = getSubPhraseSearchResult(queryText, choice, count)
+            if(searchResult) 
+                return getSearchResultHitIds(searchResult, fieldId)
             end
             return Array.new
         end
@@ -412,7 +413,7 @@ module BoxalinoPackage
 
         def getVariantExtraInfo(variant, extraInfoKey, defaultExtraInfoValue = nil) 
             if(variant) 
-                if(variant.extraInfo.kind_of?(Array) && variant.extraInfo.size > 0 && variant->extraInfo.keys[extraInfoKey]) 
+                if(variant.extraInfo.kind_of?(Array) && variant.extraInfo.size > 0 && variant.extraInfo.keys[extraInfoKey]) 
                     return variant.extraInfo[extraInfoKey]
                 end
                 return defaultExtraInfoValue
@@ -429,9 +430,9 @@ module BoxalinoPackage
 
         def prettyPrintLabel(label, prettyPrint=false) 
             if(prettyPrint) 
-            	label['_'] = " "
-            	label['products'] = ""
-            	label = label.strip
+                label['_'] = " "
+                label['products'] = ""
+                label = label.strip
                 label = label[0,1].upcase
             end
             return label
@@ -495,7 +496,7 @@ module BoxalinoPackage
             return getExtraInfo('search_message_side_image_style', defaultExtraInfoValue, choice, considerRelaxation, count, maxDistance, discardIfSubPhrases)
         end
 
-        def getSearchMessageMainImageStyle(defaultExtraInfoValue = nil, prettyPrint=false, choice=nil,, considerRelaxation=true, count=0, maxDistance=10, discardIfSubPhrases = true) 
+        def getSearchMessageMainImageStyle(defaultExtraInfoValue = nil, prettyPrint=false, choice=nil, considerRelaxation=true, count=0, maxDistance=10, discardIfSubPhrases = true) 
             return getExtraInfo('search_message_main_image_style', defaultExtraInfoValue, choice, considerRelaxation, count, maxDistance, discardIfSubPhrases)
         end
 
@@ -521,6 +522,6 @@ module BoxalinoPackage
 
         def getSearchMessageDisplayType(defaultExtraInfoValue = nil, prettyPrint=false, choice=nil, considerRelaxation=true, count=0, maxDistance=10, discardIfSubPhrases = true) 
             return getExtraInfo('search_message_display_type', defaultExtraInfoValue, choice, considerRelaxation, count, maxDistance, discardIfSubPhrases)
-        end	
+        end 
     end
 end

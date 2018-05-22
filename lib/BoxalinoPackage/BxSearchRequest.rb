@@ -1,5 +1,5 @@
 module BoxalinoPackage
-	require 'BxRequest'
+	require 'BoxalinoPackage/BxRequest'
 	class BxSearchRequest 
 		def initialize(language, queryText, max=10, choiceId=nil)
 		    if (choiceId == nil) 

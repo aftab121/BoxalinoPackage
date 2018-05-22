@@ -1,6 +1,6 @@
 module BoxalinoPackage
 	class BxClient
-		#require 'p13n_service'
+		require 'BoxalinoPackage/p13n_service'
 		require 'pp'
 		 @isTest = nil
 		 @autocompleteRequests = nil

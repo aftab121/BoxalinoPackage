@@ -1,5 +1,5 @@
 module BoxalinoPackage
-	require 'BxRequest'
+	require 'BoxalinoPackage/BxRequest'
 	class BxParametrizedRequest < BxRequest
 		
 		@bxReturnFields = ['id']

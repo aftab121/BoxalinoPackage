@@ -1,7 +1,7 @@
 module BoxalinoPackage
 	class BxRequest
-	#	require 'BxSortFields'
-		require 'p13n_types'
+		require 'BoxalinoPackage/BxSortFields'
+		require 'BoxalinoPackage/p13n_types'
 		
 
 	  def initialize(language, choiceId, max=10, min=0)

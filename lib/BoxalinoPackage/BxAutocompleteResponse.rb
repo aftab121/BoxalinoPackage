@@ -15,7 +15,7 @@ module BoxalinoPackage
 
 	    def getPrefixSearchHash
 	        if (getResponse().prefixSearchResult.totalHitCount > 0) 
-	            hashcode = Digest::MD5.hexdigest getResponse()->prefixSearchResult->queryText
+	            hashcode = Digest::MD5.hexdigest getResponse().prefixSearchResult.queryText
 	            return hashcode[ 0, 10]
 	        else 
 	            return nil

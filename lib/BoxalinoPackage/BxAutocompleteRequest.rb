@@ -1,6 +1,6 @@
 module BoxalinoPackage
 	class BxAutocompleteRequest
-		require 'BxSearchRequest'
+		require 'BoxalinoPackage/BxSearchRequest'
 		indexId = nil
 
 		def initialize(language, queryText, textualSuggestionsHitCount, productSuggestionHitCount = 5, autocompleteChoiceId = 'autocomplete', searchChoiceId = 'search', highlight = true, highlightPre = '<em>', highlightPost = '</em>')  
